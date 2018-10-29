@@ -5,7 +5,7 @@ terDigitZero = "0" ;
 terDigitOne = "1" ;
 terDigitExcludingZero = terDigitOne | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
 terDigitIncludingZero = terDigitZero | terDigitExcludingZero ;
-terChar = "a";
+terChar = "a" ;
 
 # SQL Operators and Keyword
 opNot = "!" | "not" ;
@@ -18,12 +18,12 @@ opIs = "is" ;
 opMinus = "-" ;
 opOr = "or" | "||" ;
 opAnd = "and" | "&&" ;
-opSel = "select"
+opSel = "select" ;
 opUni = "union" ;
 opSem = ";" ;
 
 # SQL functions
-parOpen = "(";
+parOpen = "(" ;
 funcSleep = "sleep" , parOpen , terDigitExcludingZero , par ;
 
 # Syntax-repairing
@@ -38,7 +38,7 @@ wsp = blank | inlineCmt ;
 ### Boolean-based Attacks ### 
 
 # boolean values which evaluate to true
-# trueConst = "true" | "tr" , [inlineCmt] , "ue";
+# trueConst = "true" | "tr" , [inlineCmt] , "ue" ;
 trueConst = "true" ; 
 trueAtom = trueConst | terDigitOne ;
 unaryTrue = wsp, trueAtom | wsp, opNot, wsp, falseAtom | opBinInvert, wsp, falseAtom | opBinInvert, wsp, trueAtom ;
@@ -46,7 +46,7 @@ binaryTrue = unaryTrue, opEqual, wsp, parOpen, unaryTrue, par | unaryFalse, opEq
 booleanTrueExpr = unaryTrue | binaryTrue ;
 
 # boolean values which evaluate to false
-# falseConst = "false" | "fa" , [inlineCmt] , "lse";
+# falseConst = "false" | "fa" , [inlineCmt] , "lse" ;
 falseConst = "false" ;
 falseAtom = wsp, falseConst |  wsp, terDigitZero | terSQuote, terSQuote ;
 unaryFalse = falseAtom | wsp, opNot, wsp, trueAtom | wsp, opNot, opBinInvert, falseAtom ;
@@ -57,13 +57,13 @@ andAttack = opAnd, booleanFalseExpr ;
 booleanAttack = orAttack | andAttack ;
 
 ### Union Attacks ###
-cols = terDigitZero;
-unionPostfix = "all", wsp | "distinct", wsp;
+cols = terDigitZero ;
+unionPostfix = "all", wsp | "distinct", wsp ;
 union = opUni | "/*!", ["50000"], opUni, "*/" ;
 unionAttack = union, wsp, [unionPostfix], opSel, wsp, cols | union, wsp, [unionPostfix] , parOpen, opSel, wsp, cols,par ;
 
 ### Piggy-backed Attacks ###
-piggyAttack = opSem, opSel, wsp, funcSleep;
+piggyAttack = opSem, opSel, wsp, funcSleep ;
 
 ### Injection Context ###
 sqliAttack = unionAttack | piggyAttack | booleanAttack ;
@@ -72,4 +72,4 @@ numericContext = terDigitZero, wsp, booleanAttack, wsp | terDigitZero, par, wsp,
 sQuoteContext = terSQuote, wsp, booleanAttack, wsp, opOr, terSQuote | terSQuote, par, wsp, booleanAttack, wsp, opOr, parOpen, terSQuote | terSQuote, [par], wsp, sqliAttack, cmt ;
 dQuoteContext = terDQuote, wsp, booleanAttack, wsp, opOr, terDQuote | terDQuote, par, wsp, booleanAttack, wsp, opOr, parOpen, terDQuote | terDQuote, [par], wsp, sqliAttack, cmt ;
 
-start = numericContext | sQuoteContext | dQuoteContext;
+start = numericContext | sQuoteContext | dQuoteContext ;
