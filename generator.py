@@ -16,7 +16,16 @@ def getVal(var, decisionList):
     retPath += str(index) + ','
     for value in vLists[index]:
         if value[0] == '[':
-            value = value[1:len(value) - 1]
+            if len(decisionList) == 0:
+                index = randint(0, 1)
+            else:
+                index = decisionList[0] % 2
+                del decisionList[0]
+            retPath += str(index) + ','
+            if index == 1:
+                value = value[1:len(value) - 1]
+            else:
+                continue
         if value[0] == '"':
             retstring += value[1:len(value) - 1]
         else:
