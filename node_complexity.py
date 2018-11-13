@@ -8,6 +8,8 @@ val_list = {}
 def getVal(var):
     if (var in val_list):
       return val_list[var]
+    #if (var == 'unaryTrue' or  var == 'unaryFalse'):
+    #  return 1
     vLists = variables[var]
     paths = 0
     for index in xrange(0,len(vLists)):
@@ -32,7 +34,10 @@ def getVal(var):
     # compute number of paths per node
     if (var not in val_list):
       val_list[var] = paths
-      print (var + ": " + str(paths))
+      if (len(var) < 7):
+      	print (var + ":\t\t " + str(paths) + "\t  : " + str(vLists))
+      else: 	
+         print (var + ":\t " + str(paths) + "\t  : " + str(vLists))
     return paths
 
 

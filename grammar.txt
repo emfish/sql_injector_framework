@@ -41,15 +41,25 @@ wsp = blank | inlineCmt ;
 # trueConst = "true" | "tr" , [inlineCmt] , "ue" ;
 trueConst = "true" ; 
 trueAtom = trueConst | terDigitOne ;
-unaryTrue = wsp, trueAtom | wsp, opNot, wsp, falseAtom | opBinInvert, wsp, falseAtom | opBinInvert, wsp, trueAtom ;
-binaryTrue = unaryTrue, opEqual, wsp, parOpen, unaryTrue, par | unaryFalse, opEqual, wsp, parOpen, unaryFalse, par | terSQuote, terChar, terSQuote, opEqual, terSQuote, terChar, terSQuote | terDQuote, terChar, terDQuote, opEqual, terDQuote, terChar, terDQuote | unaryFalse, opLt, parOpen, unaryTrue, par | unaryTrue, opGt, parOpen, unaryFalse, par | wsp, trueAtom, wsp, opLike, wsp, trueAtom | unaryTrue, wsp, opIs, wsp, trueConst | unaryFalse, wsp, opIs, wsp, falseConst | unaryTrue, opMinus, parOpen, unaryFalse, par ;  
+unaryTrue = wsp, trueAtom | wsp, opNot, wsp, falseAtom | opBinInvert, wsp, falseAtom | wsp, opNot, wsp, opBinInvert, trueAtom ;
+bT1 = unaryTrue, opEqual, wsp, parOpen, unaryTrue, par ;
+bT2 = unaryFalse, opEqual, wsp, parOpen, unaryFalse, par ;
+bT3 = terSQuote, terChar, terSQuote, opEqual, terSQuote, terChar, terSQuote ;
+bT4 = terDQuote, terChar, terDQuote, opEqual, terDQuote, terChar, terDQuote ;
+bT5 = unaryFalse, opLt, parOpen, unaryTrue, par ;
+bT6 = unaryTrue, opGt, parOpen, unaryFalse, par ;
+bT7 = wsp, trueAtom, wsp, opLike, wsp, trueAtom ;
+bT8 = unaryTrue, wsp, opIs, wsp, trueConst ;
+bT9 = unaryFalse, wsp, opIs, wsp, falseConst ;
+bT10 = unaryTrue, opMinus, parOpen, unaryFalse, par ;
+binaryTrue = bT1 | bT2 | bT3 | bT4 | bT5 | bT6 | bT7 | bT8 | bT9 | bT10 ;  
 booleanTrueExpr = unaryTrue | binaryTrue ;
 
 # boolean values which evaluate to false
 # falseConst = "false" | "fa" , [inlineCmt] , "lse" ;
 falseConst = "false" ;
 falseAtom = wsp, falseConst |  wsp, terDigitZero | terSQuote, terSQuote ;
-unaryFalse = falseAtom | wsp, opNot, wsp, trueAtom | wsp, opNot, opBinInvert, falseAtom ;
+unaryFalse = falseAtom | wsp, opNot, wsp, trueAtom | wsp, opNot, opBinInvert, falseAtom | wsp, opBinInvert, trueAtom ;
 booleanFalseExpr = unaryFalse ;
 
 orAttack = opOr, booleanTrueExpr ;
