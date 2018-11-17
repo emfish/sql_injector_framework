@@ -2,6 +2,7 @@
 import sys
 from random import randint
 
+grammar='grammar.txt'
 variables = {}
 val_list = {}
 pruned_list = {}
@@ -11,38 +12,27 @@ subTrees = []
 def getVal(var, prune):
     if (var in val_list):
       return val_list[var]
-    if (prune and (var in pruned_list)):
-      val_list[var] = 1
-      print (var.ljust(25) + "1" )# + str(vLists))
-      return 1
     #if (var == 'unaryTrue' or  var == 'unaryFalse'):
     #  return 1
     vLists = variables[var]
-    paths = 0
+    paths = 1
+    maxSubPaths = 0
     for index in xrange(0,len(vLists)):
-      vpaths = 1
-      opt_path = 0
+      vpaths = 0
       
       #if (var == 'terDigitZero'):
       #  print (vLists)  
       #  print(vLists[index])
 
       for value in vLists[index]:
-         opt_path = 0
          if value[0] == '[':
             value = value[1:len(value) - 1]
-            opt_path += 1
-         if value[0] == '"':
-            vpaths *= 1
-         else:
-            if (value not in subTrees):
-                vpaths *= getVal(value, prune) + opt_path
-         vpaths += opt_path
-      paths += vpaths
-    
-    # build prune list
-    if (not prune and paths <= prune_thresh):
-      pruned_list[var] = paths
+            vpaths += 1
+         if value[0] != '"':
+            vpaths += getVal(value, prune)
+      if vpaths > maxSubPaths:
+         maxSubPaths = vpaths
+    paths += maxSubPaths
 
     # compute number of paths per node
     if (var not in val_list):
@@ -52,7 +42,10 @@ def getVal(var, prune):
 
 
 def main():
-    with open('grammar.txt') as grammarfile:
+    if (len(sys.argv) > 1):
+       global grammar
+       grammar=sys.argv[1]
+    with open(grammar) as grammarfile:
         for line in grammarfile:
             if len(line) > 0 and line[0] == '#':
                 continue
@@ -99,11 +92,4 @@ def main():
                     vLists.append(vList)
                 variables[name] = vLists
     getVal('start', False) # Build prune list
-    val_list.clear()
-    print ("\nPruning all nodes with complexity under " + str(prune_thresh) )
-    getVal('start', True)  # Prune
-    print(str(pruned_list))
-    for val in variables.keys():
-        if val not in pruned_list:
-            print val
 main()
