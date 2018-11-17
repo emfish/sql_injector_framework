@@ -7,6 +7,7 @@ val_list = {}
 pruned_list = {}
 prune_thresh=0
 subTrees = []
+grammar='grammar.txt'
 
 def getVal(var, prune):
     if (var in val_list):
@@ -52,7 +53,10 @@ def getVal(var, prune):
 
 
 def main():
-    with open('grammar.txt') as grammarfile:
+    if (len(sys.argv) > 1):
+       global grammar
+       grammar=sys.argv[1]
+    with open(grammar) as grammarfile:
         for line in grammarfile:
             if len(line) > 0 and line[0] == '#':
                 continue
@@ -99,11 +103,11 @@ def main():
                     vLists.append(vList)
                 variables[name] = vLists
     getVal('start', False) # Build prune list
-    val_list.clear()
-    print ("\nPruning all nodes with complexity under " + str(prune_thresh) )
-    getVal('start', True)  # Prune
-    print(str(pruned_list))
-    for val in variables.keys():
-        if val not in pruned_list:
-            print val
+    #val_list.clear()
+    #print ("\nPruning all nodes with complexity under " + str(prune_thresh) )
+    #getVal('start', True)  # Prune
+    #print(str(pruned_list))
+    #for val in variables.keys():
+    #    if val not in pruned_list:
+    #        print val
 main()
