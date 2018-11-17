@@ -4,24 +4,33 @@ import re
 from random import randint
 from collections import defaultdict
 
-variables = {}
-indexCnt = {}
-subPaths = {}
-nodeComp = {}
-subPathSize=3
-maxTests=100000
-DEBUG_PRINT = True
+
+# WARNING: This script is turning into spaghetti
+ 
+variables = {}	# Holds each variable defined in the grammar
+indexCnt = {}	# Tracks the number of subPaths to explore for each child node 
+subPaths = {}	# holds every possible decision combination that can be used at each node 
+					#  up to length <sys.argv[1]>. These are popped off as they are explored
+subPathCp = {} # Copy of subPaths, this is sloppy
+nodeComp = {}  # Tracks the total subPaths per node. Not really being used atm (sloppy)
+subPathSize=3  # Maximum depgth of tracked subTree (overwritten by sys.argv[1]
+maxTests=10000    # Maximum number of tests to try
+DEBUG_PRINT = False
 VERBOSE_DEBUG_PRINT = False
+GENERATE_OUTPUT = True
 
-uniqueAttacks = []
-duplicateAttacks = {}
+uniqueAttacks = [] # store all generated attacks (may be easier just to print them)
+duplicateAttacks = {} # stores duplicate attacks (good for debugging a shitty path selection algorithm
 
-def dPrint(str):
+def dPrint(instr):
     if (DEBUG_PRINT == True):
-        print (str)
-def vdPrint(str):
+        print (instr)
+def vdPrint(instr):
     if (VERBOSE_DEBUG_PRINT == True):
-        print (str)
+        print (instr)
+def oPrint(instr):
+    if (GENERATE_OUTPUT == True):
+        print (instr)
 
 def incDecisionTree(dList, idx):
     assert idx < len(dList)
@@ -37,6 +46,7 @@ def crawlSubPaths(var):
         rpl = rp[0:len(rp)-1].split(',')[:subPathSize]
         rp = ','.join(rpl) + ','
         subPaths[var]['paths'].append(rp)
+        subPathCp[var].append(rp)
         curPtr = len(rpl) - 1
         done = False
         while not done:
@@ -47,6 +57,7 @@ def crawlSubPaths(var):
            
            if (rpl[curPtr] == rpl2[curPtr]):
                subPaths[var]['paths'].append(rp)
+               subPathCp[var].append(rp)
                printnum += 1
                rpl = rpl2
                curPtr = len(rpl) - 1
@@ -150,6 +161,44 @@ def getVal(var, decisionList):
     totalPaths = sum(indexCnt[var])
     return retstring, retPath, totalPaths
 
+def fillSelectionList(var, decisionList):
+    vLists = variables[var]
+    decisionString = ','.join(map(str, decisionList[:subPathSize])) + ','
+    SPSelectionList = []
+
+    assert (len(decisionList) != 0) 
+    # this is so ugly it hurts
+    for i in range(0, subPathSize):
+       if decisionString in subPathCp[var]:
+          break
+       else: 
+          decisionString = decisionString[0:len(decisionString)-1].rpartition(',')[0] + ','
+    found = False
+    for i in range(0, len(subPathCp[var])):
+       if (subPathCp[var][i] == decisionString):
+           found = True
+           SPSelectionList.append(var + "__" + str(i))
+    if found == False:
+        print(var + " " + decisionString + " " + str(subPathCp[var]))
+    assert(found == True)    
+
+    index = decisionList[0] % len(vLists)
+    del decisionList[0]
+    for value in vLists[index]:
+        if value[0] == '[':
+            assert(len(decisionList) != 0)
+            idx = decisionList[0] % 2
+            del decisionList[0]
+            if idx == 1:
+                value = value[1:len(value) - 1]
+            else:
+                continue
+        if value[0] != '"':
+            spsl = fillSelectionList(value, decisionList)
+            SPSelectionList.extend(spsl)
+    return SPSelectionList
+
+
 def nodeComplexity(var):
     if (var in nodeComp):
       return nodeComp[var]
@@ -179,6 +228,7 @@ def nodeComplexity(var):
     
     if (var not in subPaths):
       subPaths[var] = {'ctr':0, 'paths':[]}
+      subPathCp[var] = []
 
     # compute number of paths per node
     if (var not in nodeComp):
@@ -201,12 +251,19 @@ def runTests():
         unexploredEdges = 0
   
         # Store Attacks (and duplicates to make sure the algorithm doesn't suck
+        # should be able to remove this in final product
         if retstring not in uniqueAttacks:
            uniqueAttacks.append(retstring)
         elif retstring not in duplicateAttacks.keys():
            duplicateAttacks[retstring] = 0
+           continue
         else:
            duplicateAttacks[retstring] += 1
+           continue
+           
+
+        SPSelectionList = fillSelectionList('start', [int(d) for d in retPath[0:len(retPath)-1].split(',')])
+        oPrint(str(i) +'\t'+ retstring +'\t'+ retPath +'\t'+ '\t'.join(map(str, SPSelectionList)))
 
         # check to see if every sub path has been explored
         for sp in subPaths.keys():
@@ -226,10 +283,6 @@ def runTests():
     dPrint ("Executed " + str(testNum) + " tests: " )
     dPrint ("Tested " + str(num_paths) + " out of " + str(max_paths) + " paths: %.2f%%" % ((float(num_paths)/float(max_paths))*100))
    
-    #print(retstring)
-    #if retPath[-1] == ',':
-    #    retPath = retPath[:-1]
-    #print(retPath)
 
 def readGrammar():
     with open('grammar.txt') as grammarfile:
