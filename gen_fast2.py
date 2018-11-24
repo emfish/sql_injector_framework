@@ -1,6 +1,7 @@
 #!/bin/python
 import sys
 import re
+import requests
 from random import randint
 from collections import defaultdict
 
