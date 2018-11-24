@@ -266,7 +266,7 @@ def runTests():
 
 
         SPSelectionList = fillSelectionList('start', [int(d) for d in retPath[0:len(retPath)-1].split(',')])
-        oPrint(res.status_code + '\t' + str(i) +'\t'+ retstring +'\t'+ retPath +'\t'+ '\t'.join(map(str, SPSelectionList)))
+        oPrint(str(res.status_code) + '\t' + str(i) +'\t'+ retstring +'\t'+ retPath +'\t'+ '\t'.join(map(str, SPSelectionList)))
 
         # check to see if every sub path has been explored
         for sp in subPaths.keys():
