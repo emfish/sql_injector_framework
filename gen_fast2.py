@@ -14,7 +14,7 @@ subPaths = {}	# holds every possible decision combination that can be used at ea
 subPathCp = {} # Copy of subPaths, this is sloppy
 nodeComp = {}  # Tracks the total subPaths per node. Not really being used atm (sloppy)
 subPathSize=3  # Maximum depgth of tracked subTree (overwritten by sys.argv[1]
-maxTests=10000    # Maximum number of tests to try
+maxTests=50    # Maximum number of tests to try
 DEBUG_PRINT = False
 VERBOSE_DEBUG_PRINT = False
 GENERATE_OUTPUT = True
@@ -261,9 +261,11 @@ def runTests():
            duplicateAttacks[retstring] += 1
            continue
            
+        res = requests.head("http://www.seedlabsqlinjection.com/unsafe_home.php?username=" + retstring + "&Password=test")
+
 
         SPSelectionList = fillSelectionList('start', [int(d) for d in retPath[0:len(retPath)-1].split(',')])
-        oPrint(str(i) +'\t'+ retstring +'\t'+ retPath +'\t'+ '\t'.join(map(str, SPSelectionList)))
+        oPrint(res.status_code + '\t' + str(i) +'\t'+ retstring +'\t'+ retPath +'\t'+ '\t'.join(map(str, SPSelectionList)))
 
         # check to see if every sub path has been explored
         for sp in subPaths.keys():
